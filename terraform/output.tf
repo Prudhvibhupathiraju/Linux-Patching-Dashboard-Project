@@ -235,3 +235,77 @@ output "rds_default_rule_details" {
     }
   }
 }
+
+output "patching_vpc_details" {
+  value = {
+    vpc_id               = data.aws_vpc.patching_vpc.id
+    cidr_block           = data.aws_vpc.patching_vpc.cidr_block
+    state                = data.aws_vpc.patching_vpc.state
+    enable_dns_support   = data.aws_vpc.patching_vpc.enable_dns_support
+    enable_dns_hostnames = data.aws_vpc.patching_vpc.enable_dns_hostnames
+    instance_tenancy     = data.aws_vpc.patching_vpc.instance_tenancy
+  }
+}
+
+output "patching_subnet_details" {
+  value = {
+    for id, subnet in data.aws_subnet.existing : id => {
+      subnet_id               = subnet.id
+      vpc_id                  = subnet.vpc_id
+      cidr_block              = subnet.cidr_block
+      availability_zone       = subnet.availability_zone
+      availability_zone_id    = subnet.availability_zone_id
+      map_public_ip_on_launch = subnet.map_public_ip_on_launch
+      state                   = subnet.state
+    }
+  }
+}
+
+output "patching_vpc_route_tables" {
+  description = "Route tables associated with the patching VPC"
+
+  value = {
+    for id, rt in data.aws_route_table.patching_vpc : id => {
+      route_table_id = rt.id
+      vpc_id         = rt.vpc_id
+      associations   = rt.associations
+      routes         = rt.routes
+      subnet_id      = rt.subnet_id
+      tags           = rt.tags
+    }
+  }
+}
+
+output "patching_vpc_internet_gateway" {
+  description = "Internet Gateway attached to the patching VPC"
+
+  value = {
+    id     = data.aws_internet_gateway.patching_vpc.id
+    owner  = data.aws_internet_gateway.patching_vpc.owner_id
+    tags   = data.aws_internet_gateway.patching_vpc.tags
+    vpc_id = data.aws_internet_gateway.patching_vpc.attachments[0].vpc_id
+    state  = data.aws_internet_gateway.patching_vpc.attachments[0].state
+  }
+}
+
+output "patching_vpc_nat_gateway_ids" {
+  description = "NAT Gateway IDs in the patching VPC"
+
+  value = data.aws_nat_gateways.patching_vpc.ids
+}
+
+output "patching_vpc_network_acl_ids" {
+  description = "Network ACL IDs in the patching VPC"
+
+  value = data.aws_network_acls.patching_vpc.ids
+}
+
+output "patching_network_acl_details" {
+  description = "Network ACL discovery details"
+
+  value = {
+    ids    = data.aws_network_acls.patching_acl.ids
+    vpc_id = data.aws_network_acls.patching_acl.vpc_id
+    tags   = data.aws_network_acls.patching_acl.tags
+  }
+}

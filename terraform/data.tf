@@ -93,3 +93,55 @@ data "aws_vpc_security_group_rule" "rds_default_rule_1" {
 data "aws_vpc_security_group_rule" "rds_default_rule_2" {
   security_group_rule_id = "sgr-040bbc13dd560c506"
 }
+
+data "aws_vpc" "patching_vpc" {
+  id = "vpc-0e1b0cb35f5adaada"
+}
+
+data "aws_subnet" "existing" {
+  for_each = toset([
+    "subnet-0bcce8d7f8928bb1b",
+    "subnet-0744f91d5af186d96",
+    "subnet-0b5d78e089bac3f8e",
+    "subnet-0947f6bcf56887471",
+    "subnet-068adf84202194d8d",
+    "subnet-03f7151d7f2991fc6",
+    "subnet-032ac9f8d59ab39a8"
+  ])
+
+  id = each.value
+}
+
+data "aws_route_tables" "patching_vpc" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.patching_vpc.id]
+  }
+}
+
+data "aws_route_table" "patching_vpc" {
+  for_each = toset(data.aws_route_tables.patching_vpc.ids)
+
+  route_table_id = each.value
+}
+
+data "aws_internet_gateway" "patching_vpc" {
+  internet_gateway_id = "igw-0c62181a84f48eec2"
+}
+
+data "aws_nat_gateways" "patching_vpc" {
+  vpc_id = data.aws_vpc.patching_vpc.id
+}
+
+data "aws_network_acls" "patching_vpc" {
+  vpc_id = data.aws_vpc.patching_vpc.id
+}
+
+data "aws_network_acls" "patching_acl" {
+  vpc_id = data.aws_vpc.patching_vpc.id
+
+  filter {
+    name   = "network-acl-id"
+    values = ["acl-08a8c35da8eb59cb4"]
+  }
+}
