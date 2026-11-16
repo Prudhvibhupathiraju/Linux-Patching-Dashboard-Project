@@ -145,3 +145,7 @@ data "aws_network_acls" "patching_acl" {
     values = ["acl-08a8c35da8eb59cb4"]
   }
 }
+
+data "aws_db_subnet_group" "patching_db" {
+  name = "linux-patching-db-subnet-group"
+}
